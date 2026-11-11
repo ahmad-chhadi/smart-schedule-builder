@@ -45,22 +45,145 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- Page 1: Courses -->
-        <LinearLayout
+        <!-- ================= Page 1: Courses ================= -->
+        <ScrollView
             android:id="@+id/pageCourses"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp"
             android:visibility="visible">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Courses page" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <!-- Page 2: Preferences -->
+                <!-- Part 1: add a course -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1. Add a course"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/inputCourseCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Course code (e.g. CSCI 410)"
+                    android:inputType="textCapCharacters" />
+
+                <EditText
+                    android:id="@+id/inputCourseTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Course title (e.g. Mobile Apps)"
+                    android:inputType="textCapWords" />
+
+                <Button
+                    android:id="@+id/btnAddCourse"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Add Course" />
+
+                <!-- Part 2: add a section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="2. Add a section"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerCourse"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+
+                <EditText
+                    android:id="@+id/inputSectionName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Section name (e.g. A)"
+                    android:inputType="textCapCharacters" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Days" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <CheckBox android:id="@+id/checkMon" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="M" />
+                    <CheckBox android:id="@+id/checkTue" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="T" />
+                    <CheckBox android:id="@+id/checkWed" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="W" />
+                    <CheckBox android:id="@+id/checkThu" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Th" />
+                    <CheckBox android:id="@+id/checkFri" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="F" />
+                    <CheckBox android:id="@+id/checkSat" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnStartTime"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:text="Start time" />
+
+                    <Button
+                        android:id="@+id/btnEndTime"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="End time" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnAddSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Add Section" />
+
+                <!-- Part 3: list of courses -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Your courses"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textEmptyCourses"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No courses yet. Add one above." />
+
+                <LinearLayout
+                    android:id="@+id/courseListContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Tip: long-press a course to remove it."
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- ================= Page 2: Preferences ================= -->
         <LinearLayout
             android:id="@+id/pagePrefs"
             android:layout_width="match_parent"
@@ -75,7 +198,7 @@
                 android:text="Preferences page" />
         </LinearLayout>
 
-        <!-- Page 3: Schedules -->
+        <!-- ================= Page 3: Schedules ================= -->
         <LinearLayout
             android:id="@+id/pageSchedules"
             android:layout_width="match_parent"
