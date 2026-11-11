@@ -1,7 +1,7 @@
 package com.ahmad.smartschedulebuilder;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,15 +9,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.ahmad.smartschedulebuilder.logic.ScheduleGenerator;
-import com.ahmad.smartschedulebuilder.model.Course;
-import com.ahmad.smartschedulebuilder.model.Section;
-import com.ahmad.smartschedulebuilder.model.TimeSlot;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
+
+    // The 3 pages of the app
+    private View pageCourses;
+    private View pagePrefs;
+    private View pageSchedules;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,36 +24,37 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // ===== Temporary test for ScheduleGenerator =====
-        Course csci = new Course("CSCI 410", "Mobile Apps");
-        Section csciA = csci.addSection("A");
-        csciA.addSlot(new TimeSlot(0, TimeSlot.toMinutes(10, 0), TimeSlot.toMinutes(11, 15))); // Mon
-        csciA.addSlot(new TimeSlot(2, TimeSlot.toMinutes(10, 0), TimeSlot.toMinutes(11, 15))); // Wed
-        Section csciB = csci.addSection("B");
-        csciB.addSlot(new TimeSlot(1, TimeSlot.toMinutes(10, 0), TimeSlot.toMinutes(11, 15))); // Tue
-        csciB.addSlot(new TimeSlot(3, TimeSlot.toMinutes(10, 0), TimeSlot.toMinutes(11, 15))); // Thu
-
-        Course math = new Course("MATH 210", "Calculus II");
-        Section mathA = math.addSection("A");
-        mathA.addSlot(new TimeSlot(2, TimeSlot.toMinutes(11, 0), TimeSlot.toMinutes(12, 0)));  // Wed
-        Section mathB = math.addSection("B");
-        mathB.addSlot(new TimeSlot(1, TimeSlot.toMinutes(10, 0), TimeSlot.toMinutes(11, 15))); // Tue
-
-        List<Course> courses = new ArrayList<>();
-        courses.add(csci);
-        courses.add(math);
-
-        List<List<Section>> schedules = ScheduleGenerator.generate(courses);
-        Log.d("TEST", "Found " + schedules.size() + " schedules");
-        for (List<Section> schedule : schedules) {
-            Log.d("TEST", schedule.toString());
-        }
-        // ===== END of test =====
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Connect Java variables to the views in the XML
+        pageCourses = findViewById(R.id.pageCourses);
+        pagePrefs = findViewById(R.id.pagePrefs);
+        pageSchedules = findViewById(R.id.pageSchedules);
+
+        // Switch pages when a tab is selected
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                showPage(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) { }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) { }
+        });
+    }
+
+    /** Shows the page at the given position (0, 1 or 2) and hides the others. */
+    private void showPage(int position) {
+        pageCourses.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
+        pagePrefs.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
+        pageSchedules.setVisibility(position == 2 ? View.VISIBLE : View.GONE);
     }
 }
