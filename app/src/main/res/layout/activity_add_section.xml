@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:text="Add sections"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textCourseTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:textSize="16sp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <EditText
+                android:id="@+id/inputSectionName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Section name (e.g. A)"
+                android:inputType="textCapCharacters" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Days" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <CheckBox android:id="@+id/checkMon" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="M" />
+                <CheckBox android:id="@+id/checkTue" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="T" />
+                <CheckBox android:id="@+id/checkWed" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="W" />
+                <CheckBox android:id="@+id/checkThu" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Th" />
+                <CheckBox android:id="@+id/checkFri" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="F" />
+                <CheckBox android:id="@+id/checkSat" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="S" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnStartTime"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="Start time" />
+
+                <Button
+                    android:id="@+id/btnEndTime"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="End time" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnAddSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add Section" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Sections of this course"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textEmptySections"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No sections yet." />
+
+            <LinearLayout
+                android:id="@+id/sectionListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Tip: add the same section name again to give it another time (e.g. Mon 10:00 and Wed 14:00)."
+                android:textSize="12sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnDone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Done" />
+</LinearLayout>

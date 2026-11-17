@@ -1,132 +1,53 @@
 package com.ahmad.smartschedulebuilder;
 
-import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.ahmad.smartschedulebuilder.data.AppData;
 import com.ahmad.smartschedulebuilder.model.Course;
 import com.ahmad.smartschedulebuilder.model.Section;
-import com.ahmad.smartschedulebuilder.model.TimeSlot;
-import com.google.android.material.tabs.TabLayout;
+import com.ahmad.smartschedulebuilder.ui.UiUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
+/** Page 1: add courses and see the list of courses. */
 public class MainActivity extends AppCompatActivity {
 
-    // ---------- App data (kept in memory only, no database) ----------
-    private final List<Course> courses = new ArrayList<>();
-
-    // ---------- Pages ----------
-    private View pageCourses;
-    private View pagePrefs;
-    private View pageSchedules;
-
-    // ---------- Courses page views ----------
     private EditText inputCourseCode;
     private EditText inputCourseTitle;
-    private EditText inputSectionName;
-    private Spinner spinnerCourse;
-    private CheckBox[] dayBoxes;          // index 0 = Mon ... 5 = Sat
-    private Button btnStartTime;
-    private Button btnEndTime;
     private LinearLayout courseListContainer;
     private TextView textEmptyCourses;
-
-    // Times chosen in the time pickers (-1 = not chosen yet)
-    private int startMinute = -1;
-    private int endMinute = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        UiUtils.applySystemBarsPadding(findViewById(R.id.main));
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        setupTabs();
-        setupCoursesPage();
-        refreshCourseList();
-    }
-
-    // =====================================================================
-    // Tabs
-    // =====================================================================
-
-    private void setupTabs() {
-        pageCourses = findViewById(R.id.pageCourses);
-        pagePrefs = findViewById(R.id.pagePrefs);
-        pageSchedules = findViewById(R.id.pageSchedules);
-
-        TabLayout tabLayout = findViewById(R.id.tabLayout);
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                showPage(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) { }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) { }
-        });
-    }
-
-    /** Shows the page at the given position (0, 1 or 2) and hides the others. */
-    private void showPage(int position) {
-        pageCourses.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
-        pagePrefs.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
-        pageSchedules.setVisibility(position == 2 ? View.VISIBLE : View.GONE);
-    }
-
-    // =====================================================================
-    // Courses page
-    // =====================================================================
-
-    private void setupCoursesPage() {
         inputCourseCode = findViewById(R.id.inputCourseCode);
         inputCourseTitle = findViewById(R.id.inputCourseTitle);
-        inputSectionName = findViewById(R.id.inputSectionName);
-        spinnerCourse = findViewById(R.id.spinnerCourse);
-        btnStartTime = findViewById(R.id.btnStartTime);
-        btnEndTime = findViewById(R.id.btnEndTime);
         courseListContainer = findViewById(R.id.courseListContainer);
         textEmptyCourses = findViewById(R.id.textEmptyCourses);
 
-        dayBoxes = new CheckBox[]{
-                findViewById(R.id.checkMon),
-                findViewById(R.id.checkTue),
-                findViewById(R.id.checkWed),
-                findViewById(R.id.checkThu),
-                findViewById(R.id.checkFri),
-                findViewById(R.id.checkSat)
-        };
-
         findViewById(R.id.btnAddCourse).setOnClickListener(v -> addCourse());
-        btnStartTime.setOnClickListener(v -> pickTime(true));
-        btnEndTime.setOnClickListener(v -> pickTime(false));
-        findViewById(R.id.btnAddSection).setOnClickListener(v -> addSection());
+        findViewById(R.id.btnClearAll).setOnClickListener(v -> confirmClearAll());
+        findViewById(R.id.btnGoPrefs).setOnClickListener(v -> goToPrefs());
+    }
+
+    /** Runs every time this page appears again (e.g. after returning from Add Sections). */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshCourseList();
     }
 
     private void addCourse() {
@@ -134,120 +55,74 @@ public class MainActivity extends AppCompatActivity {
         String title = inputCourseTitle.getText().toString().trim();
 
         if (code.isEmpty()) {
-            toast("Please enter a course code");
+            UiUtils.toast(this, "Please enter a course code");
             return;
         }
-        if (findCourse(code) != null) {
-            toast(code + " already exists");
+        if (AppData.findCourse(code) != null) {
+            UiUtils.toast(this, code + " already exists");
             return;
         }
 
-        courses.add(new Course(code, title.isEmpty() ? "-" : title));
+        Course course = new Course(code, title.isEmpty() ? "-" : title);
+        AppData.courses.add(course);
+        AppData.clearResults();
         inputCourseCode.setText("");
         inputCourseTitle.setText("");
-        refreshCourseList();
-        toast("Added " + code);
+
+        // Go straight to adding sections for the new course
+        openAddSection(course);
     }
 
-    /** Returns the course with this code, or null if it does not exist. */
-    private Course findCourse(String code) {
-        for (Course c : courses) {
-            if (c.getCode().equalsIgnoreCase(code)) {
-                return c;
-            }
-        }
-        return null;
+    /** Opens the Add Sections page for one course. */
+    private void openAddSection(Course course) {
+        Intent intent = new Intent(this, AddSectionActivity.class);
+        intent.putExtra(AddSectionActivity.EXTRA_COURSE_CODE, course.getCode());
+        startActivity(intent);
     }
 
-    /** Opens a clock dialog. isStart = true for the start time, false for the end time. */
-    private void pickTime(boolean isStart) {
-        int current = isStart ? startMinute : endMinute;
-        int hour = current >= 0 ? current / 60 : 8;
-        int minute = current >= 0 ? current % 60 : 0;
-
-        new TimePickerDialog(this, (view, h, m) -> {
-            String label = String.format(Locale.US, "%02d:%02d", h, m);
-            if (isStart) {
-                startMinute = TimeSlot.toMinutes(h, m);
-                btnStartTime.setText("Start " + label);
-            } else {
-                endMinute = TimeSlot.toMinutes(h, m);
-                btnEndTime.setText("End " + label);
+    private void goToPrefs() {
+        if (AppData.courses.isEmpty()) {
+            UiUtils.toast(this, "Add at least one course first");
+            return;
+        }
+        for (Course c : AppData.courses) {
+            if (c.getSections().isEmpty()) {
+                UiUtils.toast(this, c.getCode() + " has no sections yet");
+                return;
             }
-        }, hour, minute, true).show();
+        }
+        startActivity(new Intent(this, PrefsActivity.class));
     }
 
-    private void addSection() {
-        // 1) Validate the input
-        if (courses.isEmpty()) {
-            toast("Add a course first");
+    /** Asks for confirmation, then removes every course. */
+    private void confirmClearAll() {
+        if (AppData.courses.isEmpty()) {
+            UiUtils.toast(this, "There is nothing to clear");
             return;
         }
-        String name = inputSectionName.getText().toString().trim().toUpperCase(Locale.US);
-        if (name.isEmpty()) {
-            toast("Please enter a section name");
-            return;
-        }
-        List<Integer> days = new ArrayList<>();
-        for (int i = 0; i < dayBoxes.length; i++) {
-            if (dayBoxes[i].isChecked()) {
-                days.add(i);
-            }
-        }
-        if (days.isEmpty()) {
-            toast("Choose at least one day");
-            return;
-        }
-        if (startMinute < 0 || endMinute < 0) {
-            toast("Choose the start and end time");
-            return;
-        }
-        if (endMinute <= startMinute) {
-            toast("End time must be after start time");
-            return;
-        }
-
-        // 2) Find the section, or create it if it is new.
-        //    Adding the same section name again adds more times to it
-        //    (useful when a section meets at different hours on different days).
-        Course course = courses.get(spinnerCourse.getSelectedItemPosition());
-        Section section = null;
-        for (Section s : course.getSections()) {
-            if (s.getName().equals(name)) {
-                section = s;
-            }
-        }
-        if (section == null) {
-            section = course.addSection(name);
-        }
-
-        // 3) Add one time slot for each selected day
-        for (int day : days) {
-            section.addSlot(new TimeSlot(day, startMinute, endMinute));
-        }
-
-        // 4) Reset the form and refresh the list
-        inputSectionName.setText("");
-        for (CheckBox box : dayBoxes) {
-            box.setChecked(false);
-        }
-        refreshCourseList();
-        toast("Added section " + name + " to " + course.getCode());
+        new AlertDialog.Builder(this)
+                .setTitle("Clear all courses?")
+                .setMessage("This removes every course and section you added.")
+                .setPositiveButton("Clear", (dialog, which) -> {
+                    AppData.courses.clear();
+                    AppData.clearResults();
+                    refreshCourseList();
+                    UiUtils.toast(this, "All courses removed");
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
-    /** Rebuilds the list of courses on screen and the course dropdown. */
+    /** Rebuilds the list of courses on screen. */
     private void refreshCourseList() {
         courseListContainer.removeAllViews();
-        textEmptyCourses.setVisibility(courses.isEmpty() ? View.VISIBLE : View.GONE);
+        textEmptyCourses.setVisibility(AppData.courses.isEmpty() ? View.VISIBLE : View.GONE);
 
-        List<String> codes = new ArrayList<>();
-        for (Course course : courses) {
-            codes.add(course.getCode());
-
+        for (Course course : AppData.courses) {
             StringBuilder text = new StringBuilder();
             text.append(course.getCode()).append(" - ").append(course.getTitle());
             if (course.getSections().isEmpty()) {
-                text.append("\n    (no sections yet)");
+                text.append("\n    (no sections yet - tap to add)");
             }
             for (Section s : course.getSections()) {
                 text.append("\n    Section ").append(s.getName()).append(": ").append(s.getSlots());
@@ -256,23 +131,18 @@ public class MainActivity extends AppCompatActivity {
             TextView row = new TextView(this);
             row.setText(text);
             row.setTextSize(16);
-            row.setPadding(0, 16, 0, 16);
+            row.setPadding(8, 24, 8, 24);
+            row.setBackgroundResource(android.R.drawable.list_selector_background);
+
+            row.setOnClickListener(v -> openAddSection(course));
             row.setOnLongClickListener(v -> {
-                courses.remove(course);
+                AppData.courses.remove(course);
+                AppData.clearResults();
                 refreshCourseList();
-                toast("Removed " + course.getCode());
+                UiUtils.toast(this, "Removed " + course.getCode());
                 return true;
             });
             courseListContainer.addView(row);
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, codes);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCourse.setAdapter(adapter);
-    }
-
-    private void toast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
