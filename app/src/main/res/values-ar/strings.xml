@@ -3,12 +3,12 @@
 
     <!-- Shared -->
     <string name="days_label">الأيام</string>
-    <string name="day_mon_short">ن</string>
-    <string name="day_tue_short">ث</string>
-    <string name="day_wed_short">ر</string>
-    <string name="day_thu_short">خ</string>
-    <string name="day_fri_short">ج</string>
-    <string name="day_sat_short">س</string>
+    <string name="day_mon_short">الإثنين</string>
+    <string name="day_tue_short">الثلاثاء</string>
+    <string name="day_wed_short">الأربعاء</string>
+    <string name="day_thu_short">الخميس</string>
+    <string name="day_fri_short">الجمعة</string>
+    <string name="day_sat_short">السبت</string>
     <string-array name="day_names">
         <item>الإثنين</item>
         <item>الثلاثاء</item>
@@ -35,6 +35,9 @@
     <string name="courses_tip">اضغط على المادة لإضافة شعبها، واضغط مطوّلاً لحذفها.</string>
     <string name="btn_clear_all">حذف الكل</string>
     <string name="btn_go_prefs">التالي: التفضيلات</string>
+    <string name="btn_example">جرّب ببيانات مثال</string>
+    <string name="msg_example_loaded">تم تحميل مواد المثال</string>
+    <string name="lang_switch">English</string>
     <string name="course_row_title">%1$s – %2$s</string>
     <string name="course_row_no_sections">لا توجد شعب بعد – اضغط للإضافة</string>
     <string name="course_row_section">الشعبة %1$s: %2$s</string>

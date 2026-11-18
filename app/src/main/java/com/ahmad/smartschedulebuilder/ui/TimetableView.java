@@ -50,18 +50,19 @@ public class TimetableView extends View {
         final int startMinute;
         final int endMinute;
         final int color;
-        final String courseLine;    // e.g. "CSCI 410"
-        final String sectionLine;   // e.g. "Sec A"
-        final String timeLine;      // e.g. "10:00"
+        final String[] lines;       // e.g. {"CSCI", "410", "Sec A", "10:00"}
 
         Block(TimeSlot slot, int color, String courseLine, String sectionLine) {
             this.day = slot.getDay();
             this.startMinute = slot.getStartMinute();
             this.endMinute = slot.getEndMinute();
             this.color = color;
-            this.courseLine = courseLine;
-            this.sectionLine = sectionLine;
-            this.timeLine = UiUtils.formatClock(slot.getStartMinute());
+            // Each word of the course code gets its own line so it fits in narrow day columns
+            String[] codeWords = courseLine.split(" ");
+            this.lines = new String[codeWords.length + 2];
+            System.arraycopy(codeWords, 0, lines, 0, codeWords.length);
+            lines[codeWords.length] = sectionLine;
+            lines[codeWords.length + 1] = UiUtils.formatClock(slot.getStartMinute());
         }
     }
 
@@ -209,9 +210,10 @@ public class TimetableView extends View {
             canvas.clipRect(rect);
             float textX = x1 + 4 * dp;
             float textY = y1 + lineHeight;
-            canvas.drawText(b.courseLine, textX, textY, blockTextPaint);
-            canvas.drawText(b.sectionLine, textX, textY + lineHeight, blockTextPaint);
-            canvas.drawText(b.timeLine, textX, textY + 2 * lineHeight, blockTextPaint);
+            for (String line : b.lines) {
+                canvas.drawText(line, textX, textY, blockTextPaint);
+                textY += lineHeight;
+            }
             canvas.restore();
         }
     }

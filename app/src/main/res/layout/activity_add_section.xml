@@ -51,6 +51,7 @@
                 android:text="@string/days_label"
                 android:textStyle="bold" />
 
+            <!-- Two rows of three days, so the labels never wrap even with a large phone font -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,6 +77,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/day_wed_short" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <CheckBox
                     android:id="@+id/checkThu"

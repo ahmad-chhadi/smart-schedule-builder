@@ -3,12 +3,12 @@
 
     <!-- Shared -->
     <string name="days_label">Days</string>
-    <string name="day_mon_short">M</string>
-    <string name="day_tue_short">T</string>
-    <string name="day_wed_short">W</string>
-    <string name="day_thu_short">Th</string>
-    <string name="day_fri_short">F</string>
-    <string name="day_sat_short">S</string>
+    <string name="day_mon_short">Mon</string>
+    <string name="day_tue_short">Tue</string>
+    <string name="day_wed_short">Wed</string>
+    <string name="day_thu_short">Thu</string>
+    <string name="day_fri_short">Fri</string>
+    <string name="day_sat_short">Sat</string>
     <!-- Index 0 = Monday ... 5 = Saturday (same as TimeSlot.getDay()) -->
     <string-array name="day_names">
         <item>Mon</item>
@@ -37,6 +37,10 @@
     <string name="courses_tip">Tap a course to add its sections. Long-press to remove it.</string>
     <string name="btn_clear_all">Clear All</string>
     <string name="btn_go_prefs">Next: Preferences</string>
+    <string name="btn_example">Try with example data</string>
+    <string name="msg_example_loaded">Example courses loaded</string>
+    <!-- Label of the language button: shows the OTHER language -->
+    <string name="lang_switch">عربي</string>
     <string name="course_row_title">%1$s – %2$s</string>
     <string name="course_row_no_sections">No sections yet – tap to add</string>
     <string name="course_row_section">Section %1$s: %2$s</string>

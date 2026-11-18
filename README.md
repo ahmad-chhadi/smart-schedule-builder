@@ -32,8 +32,13 @@ During registration every course has several sections on different days and time
 
 ## Screenshots
 
-<!-- Add screenshots to a docs/ folder and link them here, for example:
-![Courses](docs/courses.png) ![Timetable](docs/timetable.png) -->
+| Courses | Sections | Preferences | Timetable |
+|---|---|---|---|
+| <img src="docs/en_courses.jpg" width="200" alt="Courses page"> | <img src="docs/en_sections.jpg" width="200" alt="Sections page"> | <img src="docs/en_prefs.jpg" width="200" alt="Preferences page"> | <img src="docs/en_schedule.jpg" width="200" alt="Timetable page"> |
+
+**Arabic** – one tap on the language button switches the whole app to Arabic (right-to-left):
+
+<img src="docs/ar_courses.jpg" width="200" alt="Courses page in Arabic">
 
 ## How it works
 

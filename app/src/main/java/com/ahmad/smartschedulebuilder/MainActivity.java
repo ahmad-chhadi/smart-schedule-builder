@@ -10,10 +10,13 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
 
 import com.ahmad.smartschedulebuilder.data.AppData;
 import com.ahmad.smartschedulebuilder.model.Course;
 import com.ahmad.smartschedulebuilder.model.Section;
+import com.ahmad.smartschedulebuilder.model.TimeSlot;
 import com.ahmad.smartschedulebuilder.ui.UiUtils;
 
 import java.util.ArrayList;
@@ -43,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnAddCourse).setOnClickListener(v -> addCourse());
         findViewById(R.id.btnClearAll).setOnClickListener(v -> confirmClearAll());
         findViewById(R.id.btnGoPrefs).setOnClickListener(v -> goToPrefs());
+        findViewById(R.id.btnExample).setOnClickListener(v -> loadExampleData());
+        findViewById(R.id.btnLanguage).setOnClickListener(v -> switchLanguage());
     }
 
     /** Runs every time this page appears again (e.g. after returning from Add Sections). */
@@ -73,6 +78,40 @@ public class MainActivity extends AppCompatActivity {
 
         // Go straight to adding sections for the new course
         openAddSection(course);
+    }
+
+    /** Switches the app between English and Arabic. The pages are recreated; AppData stays in memory. */
+    private void switchLanguage() {
+        String current = getResources().getConfiguration().getLocales().get(0).getLanguage();
+        String target = current.equals("ar") ? "en" : "ar";
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(target));
+    }
+
+    /** Fills in two sample courses (useful for a quick demo). Replaces the current courses. */
+    private void loadExampleData() {
+        AppData.courses.clear();
+
+        Course csci = new Course("CSCI 410", "Mobile Apps");
+        Section csciA = csci.addSection("A");
+        csciA.addSlot(new TimeSlot(0, TimeSlot.toMinutes(8, 0), TimeSlot.toMinutes(9, 15)));    // Mon
+        csciA.addSlot(new TimeSlot(2, TimeSlot.toMinutes(8, 0), TimeSlot.toMinutes(9, 15)));    // Wed
+        Section csciB = csci.addSection("B");
+        csciB.addSlot(new TimeSlot(1, TimeSlot.toMinutes(11, 0), TimeSlot.toMinutes(12, 15)));  // Tue
+        csciB.addSlot(new TimeSlot(3, TimeSlot.toMinutes(11, 0), TimeSlot.toMinutes(12, 15)));  // Thu
+
+        Course math = new Course("MATH 210", "Calculus II");
+        Section mathA = math.addSection("A");
+        mathA.addSlot(new TimeSlot(0, TimeSlot.toMinutes(9, 30), TimeSlot.toMinutes(10, 45)));  // Mon
+        mathA.addSlot(new TimeSlot(2, TimeSlot.toMinutes(9, 30), TimeSlot.toMinutes(10, 45)));  // Wed
+        Section mathB = math.addSection("B");
+        mathB.addSlot(new TimeSlot(1, TimeSlot.toMinutes(8, 0), TimeSlot.toMinutes(9, 15)));    // Tue
+        mathB.addSlot(new TimeSlot(3, TimeSlot.toMinutes(8, 0), TimeSlot.toMinutes(9, 15)));    // Thu
+
+        AppData.courses.add(csci);
+        AppData.courses.add(math);
+        AppData.clearResults();
+        refreshCourseList();
+        UiUtils.toast(this, getString(R.string.msg_example_loaded));
     }
 
     /** Opens the Add Sections page for one course. */
