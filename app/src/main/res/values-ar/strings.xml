@@ -1,0 +1,123 @@
+<resources>
+    <string name="app_name">منشئ الجدول الذكي</string>
+
+    <!-- Shared -->
+    <string name="days_label">الأيام</string>
+    <string name="day_mon_short">ن</string>
+    <string name="day_tue_short">ث</string>
+    <string name="day_wed_short">ر</string>
+    <string name="day_thu_short">خ</string>
+    <string name="day_fri_short">ج</string>
+    <string name="day_sat_short">س</string>
+    <string-array name="day_names">
+        <item>الإثنين</item>
+        <item>الثلاثاء</item>
+        <item>الأربعاء</item>
+        <item>الخميس</item>
+        <item>الجمعة</item>
+        <item>السبت</item>
+    </string-array>
+    <string name="slot_format">%1$s %2$s–%3$s</string>
+    <string name="slot_separator">"، "</string>
+    <string name="cancel">إلغاء</string>
+    <string name="duration_minutes">%1$d د</string>
+    <string name="duration_hours">%1$d س</string>
+    <string name="duration_hours_minutes">%1$d س %2$d د</string>
+
+    <!-- Page 1: courses (MainActivity) -->
+    <string name="main_step">الخطوة 1 من 3 · موادك</string>
+    <string name="add_course_title">إضافة مادة</string>
+    <string name="hint_course_code">رمز المادة (مثلاً CSCI 410)</string>
+    <string name="hint_course_title">اسم المادة (مثلاً Mobile Apps)</string>
+    <string name="btn_add_course">إضافة المادة</string>
+    <string name="your_courses">موادك</string>
+    <string name="no_courses">لا توجد مواد بعد. أضف مادة في الأعلى.</string>
+    <string name="courses_tip">اضغط على المادة لإضافة شعبها، واضغط مطوّلاً لحذفها.</string>
+    <string name="btn_clear_all">حذف الكل</string>
+    <string name="btn_go_prefs">التالي: التفضيلات</string>
+    <string name="course_row_title">%1$s – %2$s</string>
+    <string name="course_row_no_sections">لا توجد شعب بعد – اضغط للإضافة</string>
+    <string name="course_row_section">الشعبة %1$s: %2$s</string>
+    <string name="msg_enter_course_code">الرجاء إدخال رمز المادة</string>
+    <string name="msg_course_exists">المادة %1$s موجودة مسبقاً</string>
+    <string name="msg_add_course_first">أضف مادة واحدة على الأقل أولاً</string>
+    <string name="msg_course_no_sections">المادة %1$s لا تحتوي على شعب بعد</string>
+    <string name="msg_nothing_to_clear">لا يوجد شيء لحذفه</string>
+    <string name="clear_dialog_title">حذف كل المواد؟</string>
+    <string name="clear_dialog_message">سيتم حذف كل المواد والشعب التي أضفتها.</string>
+    <string name="clear_dialog_confirm">حذف</string>
+    <string name="msg_all_removed">تم حذف كل المواد</string>
+    <string name="msg_course_removed">تم حذف %1$s</string>
+
+    <!-- Page 2: sections (AddSectionActivity) -->
+    <string name="add_sections_title">إضافة الشعب</string>
+    <string name="hint_section_name">اسم الشعبة (مثلاً A)</string>
+    <string name="btn_start_time">وقت البداية</string>
+    <string name="btn_end_time">وقت النهاية</string>
+    <string name="btn_start_time_value">البداية %1$s</string>
+    <string name="btn_end_time_value">النهاية %1$s</string>
+    <string name="btn_add_section">إضافة الشعبة</string>
+    <string name="sections_of_course">شعب هذه المادة</string>
+    <string name="no_sections">لا توجد شعب بعد.</string>
+    <string name="section_title">الشعبة %1$s</string>
+    <string name="sections_tip">نصائح: أضف اسم الشعبة نفسه مرة أخرى لتعطيها وقتاً آخر (مثلاً الإثنين 10:00 والأربعاء 14:00). اضغط مطوّلاً على الشعبة لحذفها.</string>
+    <string name="btn_done">تم</string>
+    <string name="msg_enter_section_name">الرجاء إدخال اسم الشعبة</string>
+    <string name="msg_choose_day">اختر يوماً واحداً على الأقل</string>
+    <string name="msg_choose_times">اختر وقت البداية والنهاية</string>
+    <string name="msg_end_after_start">يجب أن يكون وقت النهاية بعد وقت البداية</string>
+    <string name="msg_section_overlaps">الشعبة %1$s لديها محاضرة في %2$s</string>
+    <string name="msg_section_added">تمت إضافة الشعبة %1$s</string>
+    <string name="msg_section_removed">تم حذف الشعبة %1$s</string>
+
+    <!-- Page 3: preferences (PrefsActivity) -->
+    <string name="prefs_title">التفضيلات</string>
+    <string name="prefs_step">الخطوة 2 من 3 · تظهر فقط الجداول التي تطابق كل هذه الشروط.</string>
+    <string name="pref_earliest_any">أبكر محاضرة: أي وقت</string>
+    <string name="pref_earliest_value">أبكر محاضرة: %1$s</string>
+    <string name="pref_latest_any">آخر نهاية: أي وقت</string>
+    <string name="pref_latest_value">آخر نهاية: %1$s</string>
+    <string name="pref_free_day">أبقِ يوماً واحداً على الأقل فارغاً (الإثنين–الجمعة)</string>
+    <string name="hint_max_hours">أقصى عدد ساعات في اليوم (اختياري)</string>
+    <string name="rank_by">ترتيب الجداول حسب</string>
+    <string-array name="rank_options">
+        <item>أقل فراغات</item>
+        <item>أقل أيام دوام</item>
+        <item>البداية الأكثر تأخراً</item>
+    </string-array>
+    <string name="btn_reset_prefs">إعادة ضبط التفضيلات</string>
+    <string name="btn_generate">إنشاء الجداول</string>
+    <string name="msg_prefs_reset">تمت إعادة ضبط التفضيلات</string>
+    <string name="msg_latest_after_earliest">يجب أن تكون آخر نهاية بعد أبكر محاضرة</string>
+    <string name="msg_max_hours_range">يجب أن يكون عدد الساعات بين 1 و24</string>
+    <string name="msg_always_clash">⚠ المادتان %1$s و%2$s تتعارضان دائماً: كل شعبة من الأولى تتداخل مع كل شعبة من الثانية.</string>
+    <string name="msg_no_single_pair">لا توجد مادتان تتعارضان دائماً، لكن لا توجد طريقة تجمع كل موادك معاً. جرّب إضافة شعب أخرى.</string>
+
+    <!-- Page 4: schedules (SchedulesActivity) -->
+    <string name="schedules_title">جداولك</string>
+    <string name="schedules_step">الخطوة 3 من 3 · الأفضل أولاً</string>
+    <string name="btn_share">مشاركة كصورة</string>
+    <string name="btn_prev">السابق</string>
+    <string name="btn_next">التالي</string>
+    <string name="btn_back_to_prefs">تغيير التفضيلات</string>
+    <string name="no_schedules_yet">لا توجد جداول بعد</string>
+    <string name="no_schedules_yet_info">ارجع إلى التفضيلات واضغط على إنشاء الجداول.</string>
+    <string name="no_clash_free">لا يوجد جدول بدون تعارض</string>
+    <string name="no_match">لا يوجد جدول يطابق تفضيلاتك</string>
+    <plurals name="no_match_info">
+        <item quantity="zero">يوجد %1$d جدول بدون تعارض، لكنها لا تطابق فلاترك. جرّب تخفيفها.</item>
+        <item quantity="one">يوجد %1$d جدول بدون تعارض، لكنه لا يطابق فلاترك. جرّب تخفيفها.</item>
+        <item quantity="two">يوجد %1$d جدولان بدون تعارض، لكنهما لا يطابقان فلاترك. جرّب تخفيفها.</item>
+        <item quantity="few">توجد %1$d جداول بدون تعارض، لكنها لا تطابق فلاترك. جرّب تخفيفها.</item>
+        <item quantity="many">يوجد %1$d جدولاً بدون تعارض، لكنها لا تطابق فلاترك. جرّب تخفيفها.</item>
+        <item quantity="other">يوجد %1$d جدول بدون تعارض، لكنها لا تطابق فلاترك. جرّب تخفيفها.</item>
+    </plurals>
+    <string name="schedule_header">الجدول %1$d من %2$d</string>
+    <string name="schedule_info">الفراغات: %1$s   ·   أيام الدوام: %2$d</string>
+    <string name="legend_course">%1$s  (الشعبة %2$s)</string>
+    <string name="block_section">شعبة %1$s</string>
+    <string name="msg_nothing_to_share">لا يوجد شيء للمشاركة بعد</string>
+    <string name="msg_image_failed">تعذّر إنشاء الصورة</string>
+    <string name="share_text">جدولي، من تطبيق منشئ الجدول الذكي</string>
+    <string name="share_chooser_title">مشاركة الجدول</string>
+</resources>

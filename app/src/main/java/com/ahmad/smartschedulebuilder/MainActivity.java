@@ -16,6 +16,8 @@ import com.ahmad.smartschedulebuilder.model.Course;
 import com.ahmad.smartschedulebuilder.model.Section;
 import com.ahmad.smartschedulebuilder.ui.UiUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /** Page 1: add courses and see the list of courses. */
@@ -55,19 +57,19 @@ public class MainActivity extends AppCompatActivity {
         String title = inputCourseTitle.getText().toString().trim();
 
         if (code.isEmpty()) {
-            UiUtils.toast(this, "Please enter a course code");
+            UiUtils.toast(this, getString(R.string.msg_enter_course_code));
             return;
         }
         if (AppData.findCourse(code) != null) {
-            UiUtils.toast(this, code + " already exists");
+            UiUtils.toast(this, getString(R.string.msg_course_exists, code));
             return;
         }
 
         Course course = new Course(code, title.isEmpty() ? "-" : title);
         AppData.courses.add(course);
         AppData.clearResults();
-        inputCourseCode.setText("");
-        inputCourseTitle.setText("");
+        inputCourseCode.getText().clear();
+        inputCourseTitle.getText().clear();
 
         // Go straight to adding sections for the new course
         openAddSection(course);
@@ -82,12 +84,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void goToPrefs() {
         if (AppData.courses.isEmpty()) {
-            UiUtils.toast(this, "Add at least one course first");
+            UiUtils.toast(this, getString(R.string.msg_add_course_first));
             return;
         }
         for (Course c : AppData.courses) {
             if (c.getSections().isEmpty()) {
-                UiUtils.toast(this, c.getCode() + " has no sections yet");
+                UiUtils.toast(this, getString(R.string.msg_course_no_sections, c.getCode()));
                 return;
             }
         }
@@ -97,52 +99,53 @@ public class MainActivity extends AppCompatActivity {
     /** Asks for confirmation, then removes every course. */
     private void confirmClearAll() {
         if (AppData.courses.isEmpty()) {
-            UiUtils.toast(this, "There is nothing to clear");
+            UiUtils.toast(this, getString(R.string.msg_nothing_to_clear));
             return;
         }
         new AlertDialog.Builder(this)
-                .setTitle("Clear all courses?")
-                .setMessage("This removes every course and section you added.")
-                .setPositiveButton("Clear", (dialog, which) -> {
+                .setTitle(R.string.clear_dialog_title)
+                .setMessage(R.string.clear_dialog_message)
+                .setPositiveButton(R.string.clear_dialog_confirm, (dialog, which) -> {
                     AppData.courses.clear();
                     AppData.clearResults();
                     refreshCourseList();
-                    UiUtils.toast(this, "All courses removed");
+                    UiUtils.toast(this, getString(R.string.msg_all_removed));
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
-    /** Rebuilds the list of courses on screen. */
+    /** Rebuilds the list of courses on screen: one card per course. */
     private void refreshCourseList() {
         courseListContainer.removeAllViews();
         textEmptyCourses.setVisibility(AppData.courses.isEmpty() ? View.VISIBLE : View.GONE);
 
         for (Course course : AppData.courses) {
-            StringBuilder text = new StringBuilder();
-            text.append(course.getCode()).append(" - ").append(course.getTitle());
-            if (course.getSections().isEmpty()) {
-                text.append("\n    (no sections yet - tap to add)");
-            }
+            // One line per section, e.g. "Section A: Mon 08:00–09:15, Wed 08:00–09:15"
+            List<String> lines = new ArrayList<>();
             for (Section s : course.getSections()) {
-                text.append("\n    Section ").append(s.getName()).append(": ").append(s.getSlots());
+                lines.add(getString(R.string.course_row_section, s.getName(),
+                        UiUtils.formatSlots(this, s.getSlots())));
+            }
+            if (lines.isEmpty()) {
+                lines.add(getString(R.string.course_row_no_sections));
             }
 
-            TextView row = new TextView(this);
-            row.setText(text);
-            row.setTextSize(16);
-            row.setPadding(8, 24, 8, 24);
-            row.setBackgroundResource(android.R.drawable.list_selector_background);
+            View card = getLayoutInflater().inflate(R.layout.item_card, courseListContainer, false);
+            TextView title = card.findViewById(R.id.textCardTitle);
+            TextView details = card.findViewById(R.id.textCardDetails);
+            title.setText(getString(R.string.course_row_title, course.getCode(), course.getTitle()));
+            details.setText(String.join("\n", lines));
 
-            row.setOnClickListener(v -> openAddSection(course));
-            row.setOnLongClickListener(v -> {
+            card.setOnClickListener(v -> openAddSection(course));
+            card.setOnLongClickListener(v -> {
                 AppData.courses.remove(course);
                 AppData.clearResults();
                 refreshCourseList();
-                UiUtils.toast(this, "Removed " + course.getCode());
+                UiUtils.toast(this, getString(R.string.msg_course_removed, course.getCode()));
                 return true;
             });
-            courseListContainer.addView(row);
+            courseListContainer.addView(card);
         }
     }
 }

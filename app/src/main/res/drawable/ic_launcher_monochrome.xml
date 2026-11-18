@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One-color version for Android 13+ themed icons: the blocks are cut out of the page -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FF000000"
+        android:fillType="evenOdd"
+        android:pathData="M35,32h38a5,5 0,0 1,5 5v38a5,5 0,0 1,-5 5h-38a5,5 0,0 1,-5 -5v-38a5,5 0,0 1,5 -5z
+            M30,44h48v2h-48z
+            M36,49h8a2,2 0,0 1,2 2v6a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-6a2,2 0,0 1,2 -2z
+            M50,55h8a2,2 0,0 1,2 2v14a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-14a2,2 0,0 1,2 -2z
+            M64,49h8a2,2 0,0 1,2 2v8a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-8a2,2 0,0 1,2 -2z
+            M36,63h8a2,2 0,0 1,2 2v8a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-8a2,2 0,0 1,2 -2z
+            M64,65h8a2,2 0,0 1,2 2v6a2,2 0,0 1,-2 2h-8a2,2 0,0 1,-2 -2v-6a2,2 0,0 1,2 -2z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M42,26a2,2 0,0 1,2 2v8a2,2 0,0 1,-4 0v-8a2,2 0,0 1,2 -2zM66,26a2,2 0,0 1,2 2v8a2,2 0,0 1,-4 0v-8a2,2 0,0 1,2 -2z" />
+</vector>

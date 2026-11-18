@@ -209,13 +209,14 @@ public class ScheduleLogicTest {
         Course math = new Course("MATH 210", "");
         math.addSection("A").addSlot(slot(MON, 10, 30, 11, 30));
 
-        List<String> reasons = ClashExplainer.explain(Arrays.asList(csci, math));
-        assertEquals(1, reasons.size());
-        assertTrue(reasons.get(0).contains("CSCI 410 and MATH 210 always clash"));
+        List<Course[]> pairs = ClashExplainer.alwaysClashingPairs(Arrays.asList(csci, math));
+        assertEquals(1, pairs.size());
+        assertEquals("CSCI 410", pairs.get(0)[0].getCode());
+        assertEquals("MATH 210", pairs.get(0)[1].getCode());
     }
 
     @Test
-    public void explainer_givesGeneralMessageWhenNoSinglePairIsToBlame() {
+    public void explainer_findsNoPairWhenNoSinglePairIsToBlame() {
         // Each pair can fit, but all three together cannot (each pair shares one free slot)
         Course a = new Course("A", "");
         a.addSection("1").addSlot(slot(MON, 8, 0, 9, 0));
@@ -229,8 +230,6 @@ public class ScheduleLogicTest {
 
         List<Course> courses = Arrays.asList(a, b, c);
         assertEquals(0, ScheduleGenerator.generate(courses).size());
-        List<String> reasons = ClashExplainer.explain(courses);
-        assertEquals(1, reasons.size());
-        assertTrue(reasons.get(0).startsWith("No two courses always clash"));
+        assertTrue(ClashExplainer.alwaysClashingPairs(courses).isEmpty());
     }
 }

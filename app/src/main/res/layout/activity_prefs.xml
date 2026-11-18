@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,17 +9,19 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
-        android:text="Preferences"
-        android:textSize="22sp"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:text="@string/prefs_title"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:text="Step 2 of 3 · Only schedules that match all of these are shown." />
+        android:paddingHorizontal="20dp"
+        android:text="@string/prefs_step"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -29,35 +32,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
             <Button
                 android:id="@+id/btnEarliest"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Earliest class: any" />
+                android:text="@string/pref_earliest_any"
+                app:icon="@drawable/ic_schedule"
+                app:iconGravity="textStart" />
 
             <Button
                 android:id="@+id/btnLatest"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Latest end: any" />
+                android:text="@string/pref_latest_any"
+                app:icon="@drawable/ic_schedule"
+                app:iconGravity="textStart" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switchFreeDay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Keep at least one free weekday (Mon-Fri)" />
+                android:layout_marginTop="12dp"
+                android:text="@string/pref_free_day" />
 
             <EditText
                 android:id="@+id/inputMaxHours"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Max class hours per day (optional)"
+                android:hint="@string/hint_max_hours"
+                android:importantForAutofill="no"
                 android:inputType="number"
                 android:maxLength="2" />
 
@@ -65,7 +73,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Rank schedules by" />
+                android:text="@string/rank_by"
+                android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/spinnerRank"
@@ -78,7 +87,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Reset preferences" />
+                android:text="@string/btn_reset_prefs"
+                app:icon="@drawable/ic_replay"
+                app:iconGravity="textStart" />
         </LinearLayout>
     </ScrollView>
 
@@ -87,5 +98,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Generate Schedules" />
+        android:text="@string/btn_generate"
+        app:icon="@drawable/ic_auto_awesome"
+        app:iconGravity="textStart" />
 </LinearLayout>

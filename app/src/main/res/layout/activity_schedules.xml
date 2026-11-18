@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,77 +10,84 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
-        android:text="Your schedules"
-        android:textSize="22sp"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:text="@string/schedules_title"
+        android:textColor="?attr/colorPrimary"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:text="Step 3 of 3 · Best schedules first" />
+        android:paddingHorizontal="20dp"
+        android:text="@string/schedules_step"
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/textScheduleHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textScheduleInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="4dp"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp">
 
-        <TextView
-            android:id="@+id/textScheduleHeader"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
-        <TextView
-            android:id="@+id/textScheduleInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            <!-- Our custom view: the weekly grid -->
+            <com.ahmad.smartschedulebuilder.ui.TimetableView
+                android:id="@+id/timetable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="12dp"
-            android:layout_weight="1">
-
-            <LinearLayout
+            <!-- Legend: which color is which course -->
+            <TextView
+                android:id="@+id/textScheduleBody"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_marginTop="12dp"
+                android:lineSpacingExtra="2dp"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </ScrollView>
 
-                <!-- Our custom view: the weekly grid -->
-                <com.ahmad.smartschedulebuilder.ui.TimetableView
-                    android:id="@+id/timetable"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <!-- Legend: which color is which course -->
-                <TextView
-                    android:id="@+id/textScheduleBody"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:textSize="15sp" />
-            </LinearLayout>
-        </ScrollView>
-    </LinearLayout>
     <Button
         android:id="@+id/btnShare"
         style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:text="Share as image" />
+        android:text="@string/btn_share"
+        app:icon="@drawable/ic_share"
+        app:iconGravity="textStart" />
+
+    <!-- Two Material navigation buttons side by side, not a dialog button bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        tools:ignore="ButtonStyle">
 
         <Button
             android:id="@+id/btnPrev"
@@ -87,14 +96,18 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="‹ Prev" />
+            android:text="@string/btn_prev"
+            app:icon="@drawable/ic_arrow_back"
+            app:iconGravity="textStart" />
 
         <Button
             android:id="@+id/btnNext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Next ›" />
+            android:text="@string/btn_next"
+            app:icon="@drawable/ic_arrow_forward"
+            app:iconGravity="textEnd" />
     </LinearLayout>
 
     <Button
@@ -104,5 +117,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"
-        android:text="‹ Change preferences" />
+        android:text="@string/btn_back_to_prefs"
+        app:icon="@drawable/ic_arrow_back"
+        app:iconGravity="textStart" />
 </LinearLayout>

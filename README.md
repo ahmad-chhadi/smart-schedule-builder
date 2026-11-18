@@ -17,6 +17,8 @@ During registration every course has several sections on different days and time
 - **Weekly timetable** – each schedule is drawn as a color-coded grid by a custom `View`.
 - **Clash explanation** – when nothing fits, the app names the courses that always clash.
 - **Share as image** – export the timetable as a PNG through the Android share menu.
+- **English and Arabic** – the app follows the phone's language; Arabic is shown right-to-left.
+- **Light and dark mode** – custom navy and orange theme, Poppins font and a custom app icon.
 - **No database** – data is kept in memory only while the app is open. Nothing is saved locally or online.
 
 ## Pages

@@ -4,6 +4,7 @@ import com.ahmad.smartschedulebuilder.model.Section;
 import com.ahmad.smartschedulebuilder.model.TimeSlot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /** Filters schedules by the user's preferences and sorts them best-first. */
@@ -35,7 +36,7 @@ public class ScheduleRanker {
             }
         }
         // Lower score = better schedule
-        kept.sort((a, b) -> Integer.compare(score(a, prefs.rankBy), score(b, prefs.rankBy)));
+        kept.sort(Comparator.comparingInt(s -> score(s, prefs.rankBy)));
         return kept;
     }
 
@@ -89,7 +90,7 @@ public class ScheduleRanker {
                     daySlots.add(slot);
                 }
             }
-            daySlots.sort((a, b) -> Integer.compare(a.getStartMinute(), b.getStartMinute()));
+            daySlots.sort(Comparator.comparingInt(TimeSlot::getStartMinute));
             for (int i = 1; i < daySlots.size(); i++) {
                 int gap = daySlots.get(i).getStartMinute() - daySlots.get(i - 1).getEndMinute();
                 if (gap > 0) {

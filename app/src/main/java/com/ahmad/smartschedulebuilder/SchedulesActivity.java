@@ -3,7 +3,6 @@ package com.ahmad.smartschedulebuilder;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
@@ -14,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
@@ -23,11 +23,14 @@ import com.ahmad.smartschedulebuilder.model.Section;
 import com.ahmad.smartschedulebuilder.model.TimeSlot;
 import com.ahmad.smartschedulebuilder.ui.TimetableView;
 import com.ahmad.smartschedulebuilder.ui.UiUtils;
+import com.google.android.material.color.MaterialColors;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /** Page 4: browse the generated schedules, best first. */
 public class SchedulesActivity extends AppCompatActivity {
@@ -41,6 +44,9 @@ public class SchedulesActivity extends AppCompatActivity {
     private Button btnShare;
 
     private int currentIndex = 0;
+
+    // Background thread used to save the shared image (file work must not block the screen)
+    private final ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +81,12 @@ public class SchedulesActivity extends AppCompatActivity {
         showCurrentSchedule();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        backgroundThread.shutdown();
+    }
+
     /** Displays the schedule at currentIndex, or a message if there is nothing to show. */
     private void showCurrentSchedule() {
         List<List<Section>> results = AppData.results;
@@ -82,18 +94,18 @@ public class SchedulesActivity extends AppCompatActivity {
         if (results.isEmpty()) {
             if (AppData.lastTotalFound == -1) {
                 // Happens if Android closed the app in the background and its memory was cleared
-                textScheduleHeader.setText("No schedules yet");
-                textScheduleInfo.setText("Go back to Preferences and press Generate Schedules.");
+                textScheduleHeader.setText(R.string.no_schedules_yet);
+                textScheduleInfo.setText(R.string.no_schedules_yet_info);
             } else if (AppData.lastTotalFound == 0) {
-                textScheduleHeader.setText("No clash-free schedule exists");
+                textScheduleHeader.setText(R.string.no_clash_free);
                 textScheduleInfo.setText(String.join("\n\n", AppData.clashReasons));
             } else {
-                textScheduleHeader.setText("No schedule matches your preferences");
-                textScheduleInfo.setText(AppData.lastTotalFound
-                        + " clash-free schedule(s) exist, but none pass your filters. Try relaxing them.");
+                textScheduleHeader.setText(R.string.no_match);
+                textScheduleInfo.setText(getResources().getQuantityString(
+                        R.plurals.no_match_info, AppData.lastTotalFound, AppData.lastTotalFound));
             }
             timetable.setVisibility(View.GONE);
-            textScheduleBody.setText("");
+            textScheduleBody.setText(null);
             btnPrev.setEnabled(false);
             btnNext.setEnabled(false);
             btnShare.setEnabled(false);
@@ -101,9 +113,10 @@ public class SchedulesActivity extends AppCompatActivity {
         }
 
         List<Section> schedule = results.get(currentIndex);
-        textScheduleHeader.setText("Schedule " + (currentIndex + 1) + " of " + results.size());
-        textScheduleInfo.setText("Gaps: " + UiUtils.formatDuration(ScheduleRanker.countGapMinutes(schedule))
-                + "   ·   Days on campus: " + ScheduleRanker.countDays(schedule));
+        textScheduleHeader.setText(getString(R.string.schedule_header, currentIndex + 1, results.size()));
+        textScheduleInfo.setText(getString(R.string.schedule_info,
+                UiUtils.formatDuration(this, ScheduleRanker.countGapMinutes(schedule)),
+                ScheduleRanker.countDays(schedule)));
 
         // Draw the weekly grid
         timetable.setVisibility(View.VISIBLE);
@@ -117,9 +130,9 @@ public class SchedulesActivity extends AppCompatActivity {
             legend.append("■ ");
             legend.setSpan(new ForegroundColorSpan(TimetableView.colorForCourse(i)),
                     start, start + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            legend.append(s.getCourseCode()).append("  (Section ").append(s.getName()).append(")\n");
+            legend.append(getString(R.string.legend_course, s.getCourseCode(), s.getName())).append("\n");
             for (TimeSlot slot : s.getSlots()) {
-                legend.append("     ").append(slot.toString()).append("\n");
+                legend.append("     ").append(UiUtils.formatSlot(this, slot)).append("\n");
             }
         }
         textScheduleBody.setText(legend);
@@ -132,37 +145,60 @@ public class SchedulesActivity extends AppCompatActivity {
     /** Turns the timetable into a PNG image and opens the Android share menu. */
     private void shareCurrentSchedule() {
         if (AppData.results.isEmpty() || timetable.getWidth() == 0) {
-            UiUtils.toast(this, "Nothing to share yet");
+            UiUtils.toast(this, getString(R.string.msg_nothing_to_share));
             return;
         }
 
-        try {
-            // 1) Draw the timetable onto a bitmap (an image in memory)
-            Bitmap bitmap = Bitmap.createBitmap(
-                    timetable.getWidth(), timetable.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            canvas.drawColor(Color.WHITE);   // white background behind the grid
-            timetable.draw(canvas);
+        // 1) Draw the timetable onto a bitmap. Views may only be touched on the main (UI) thread.
+        Bitmap bitmap = Bitmap.createBitmap(
+                timetable.getWidth(), timetable.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        // Same background as the screen, so the image looks right in light and dark mode
+        canvas.drawColor(MaterialColors.getColor(timetable, com.google.android.material.R.attr.colorSurface));
+        timetable.draw(canvas);
 
-            // 2) Save it as a temporary PNG in the app's cache folder
-            File folder = new File(getCacheDir(), "images");
-            folder.mkdirs();
-            File file = new File(folder, "schedule.png");
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            }
+        File folder = new File(getCacheDir(), "images");
+        btnShare.setEnabled(false);      // avoid double taps while saving
 
-            // 3) Get a safe link to the file and open the share menu
-            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("image/png");
-            share.putExtra(Intent.EXTRA_STREAM, uri);
-            share.putExtra(Intent.EXTRA_TEXT, "My schedule, made with Smart Schedule Builder");
-            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(share, "Share schedule"));
+        // 2) Saving the PNG file is slow work, so it runs on the background thread
+        backgroundThread.execute(() -> {
+            File file = savePng(bitmap, folder);
 
-        } catch (IOException e) {
-            UiUtils.toast(this, "Could not create the image");
+            // 3) Back on the main thread: open the share menu (or show an error)
+            runOnUiThread(() -> {
+                btnShare.setEnabled(true);
+                if (file == null) {
+                    UiUtils.toast(this, getString(R.string.msg_image_failed));
+                } else {
+                    openShareMenu(file);
+                }
+            });
+        });
+    }
+
+    /** Saves the bitmap as images/schedule.png in the cache folder. Returns null if it fails. */
+    @WorkerThread
+    private static File savePng(Bitmap bitmap, File folder) {
+        if (!folder.exists() && !folder.mkdirs()) {
+            return null;
         }
+        File file = new File(folder, "schedule.png");
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            return file;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /** Opens the Android share menu with a safe, temporary link to the image. */
+    private void openShareMenu(File file) {
+        Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("image/png");
+        share.putExtra(Intent.EXTRA_STREAM, uri);
+        share.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text));
+        share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(share, getString(R.string.share_chooser_title)));
     }
 }

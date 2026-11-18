@@ -5,12 +5,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 
+import androidx.core.content.res.ResourcesCompat;
+
+import com.ahmad.smartschedulebuilder.R;
 import com.ahmad.smartschedulebuilder.model.Section;
 import com.ahmad.smartschedulebuilder.model.TimeSlot;
+import com.google.android.material.color.MaterialColors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +26,6 @@ import java.util.Locale;
  * days across the top, hours down the side, one colored block per class.
  */
 public class TimetableView extends View {
-
-    private static final String[] DAY_NAMES = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
     // One color per course (dark enough for white text)
     private static final int[] COURSE_COLORS = {
@@ -41,36 +44,65 @@ public class TimetableView extends View {
     private static final float LABEL_WIDTH_DP = 44;  // width of the hour-label column
     private static final float HOUR_HEIGHT_DP = 64;  // height of one hour
 
+    /** One colored rectangle on the grid, prepared before drawing. */
+    private static final class Block {
+        final int day;
+        final int startMinute;
+        final int endMinute;
+        final int color;
+        final String courseLine;    // e.g. "CSCI 410"
+        final String sectionLine;   // e.g. "Sec A"
+        final String timeLine;      // e.g. "10:00"
+
+        Block(TimeSlot slot, int color, String courseLine, String sectionLine) {
+            this.day = slot.getDay();
+            this.startMinute = slot.getStartMinute();
+            this.endMinute = slot.getEndMinute();
+            this.color = color;
+            this.courseLine = courseLine;
+            this.sectionLine = sectionLine;
+            this.timeLine = UiUtils.formatClock(slot.getStartMinute());
+        }
+    }
+
     private final float dp;   // 1 dp in pixels on this phone
+    private final String[] dayNames;   // from strings.xml, so they follow the phone's language
     private final Paint gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint labelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint blockPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint blockTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final RectF rect = new RectF();   // reused, so onDraw creates fewer objects
+    private final RectF rect = new RectF();   // reused, so onDraw creates no objects
 
-    private List<Section> schedule = new ArrayList<>();
+    // Everything onDraw needs is prepared in setSchedule(), so drawing creates no new objects
+    private final List<Block> blocks = new ArrayList<>();
+    private String[] hourLabels = new String[0];
     private int firstHour = 8;    // first hour shown on the grid
     private int lastHour = 17;    // grid ends at this hour
     private int dayCount = 5;     // Mon-Fri, or Mon-Sat if a class is on Saturday
 
-    public TimetableView(Context context) {
-        this(context, null);
-    }
-
-    /** This constructor is used when the view is created from XML. */
+    /** Used when the view is created from XML (activity_schedules.xml). */
     public TimetableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         dp = getResources().getDisplayMetrics().density;
+        dayNames = getResources().getStringArray(R.array.day_names);
 
-        gridPaint.setColor(Color.parseColor("#DDDDDD"));
-        gridPaint.setStrokeWidth(1 * dp);
+        // Grid and label colors come from the app theme, so they work in light and dark mode
+        gridPaint.setColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOutline));
+        gridPaint.setAlpha(70);
+        gridPaint.setStrokeWidth(dp);
 
-        labelPaint.setColor(Color.parseColor("#666666"));
+        labelPaint.setColor(MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurfaceVariant));
         labelPaint.setTextSize(sp(12));
+
+        // Same font as the rest of the app (falls back to the default font if it cannot load)
+        Typeface appFont = ResourcesCompat.getFont(context, R.font.poppins);
+        labelPaint.setTypeface(appFont);
 
         blockTextPaint.setColor(Color.WHITE);
         blockTextPaint.setTextSize(sp(11));
-        blockTextPaint.setFakeBoldText(true);
+        blockTextPaint.setTypeface(Typeface.create(appFont, Typeface.BOLD));
+
+        buildHourLabels();
     }
 
     /** The color used for the course at this position in the schedule. */
@@ -78,18 +110,21 @@ public class TimetableView extends View {
         return COURSE_COLORS[index % COURSE_COLORS.length];
     }
 
-    /** Shows a new schedule: works out the hours and days to display, then redraws. */
+    /** Shows a new schedule: works out the hours, days and blocks to display, then redraws. */
     public void setSchedule(List<Section> schedule) {
-        this.schedule = schedule;
-
+        blocks.clear();
         int minStart = 24 * 60;
         int maxEnd = 0;
         boolean hasSaturday = false;
-        for (Section s : schedule) {
-            for (TimeSlot t : s.getSlots()) {
-                minStart = Math.min(minStart, t.getStartMinute());
-                maxEnd = Math.max(maxEnd, t.getEndMinute());
-                if (t.getDay() == 5) {
+
+        for (int i = 0; i < schedule.size(); i++) {
+            Section section = schedule.get(i);
+            String sectionLine = getContext().getString(R.string.block_section, section.getName());
+            for (TimeSlot slot : section.getSlots()) {
+                blocks.add(new Block(slot, colorForCourse(i), section.getCourseCode(), sectionLine));
+                minStart = Math.min(minStart, slot.getStartMinute());
+                maxEnd = Math.max(maxEnd, slot.getEndMinute());
+                if (slot.getDay() == 5) {
                     hasSaturday = true;
                 }
             }
@@ -103,9 +138,18 @@ public class TimetableView extends View {
             lastHour = (maxEnd + 59) / 60;      // round up to the hour
         }
         dayCount = hasSaturday ? 6 : 5;
+        buildHourLabels();
 
         requestLayout();   // the height may change -> measure again
         invalidate();      // draw again
+    }
+
+    /** Prepares the "08:00", "09:00", ... labels for the current hour range. */
+    private void buildHourLabels() {
+        hourLabels = new String[lastHour - firstHour + 1];
+        for (int h = firstHour; h <= lastHour; h++) {
+            hourLabels[h - firstHour] = String.format(Locale.US, "%02d:00", h);
+        }
     }
 
     /** Tells Android how big this view wants to be. */
@@ -130,7 +174,7 @@ public class TimetableView extends View {
         labelPaint.setTextAlign(Paint.Align.CENTER);
         for (int d = 0; d < dayCount; d++) {
             float centerX = left + d * dayWidth + dayWidth / 2;
-            canvas.drawText(DAY_NAMES[d], centerX, top - 10 * dp, labelPaint);
+            canvas.drawText(dayNames[d], centerX, top - 10 * dp, labelPaint);
         }
 
         // 2) Hour lines and hour labels down the side
@@ -138,7 +182,7 @@ public class TimetableView extends View {
         for (int h = firstHour; h <= lastHour; h++) {
             float y = top + (h - firstHour) * hourHeight;
             canvas.drawLine(left, y, getWidth(), y, gridPaint);
-            canvas.drawText(String.format(Locale.US, "%02d:00", h), 4 * dp, y + 4 * dp, labelPaint);
+            canvas.drawText(hourLabels[h - firstHour], 4 * dp, y + 4 * dp, labelPaint);
         }
 
         // 3) Vertical lines between days
@@ -149,33 +193,26 @@ public class TimetableView extends View {
 
         // 4) One colored block for every class
         float lineHeight = blockTextPaint.getTextSize() * 1.25f;
-        for (int i = 0; i < schedule.size(); i++) {
-            Section section = schedule.get(i);
-            blockPaint.setColor(colorForCourse(i));
+        for (Block b : blocks) {
+            // Convert day and time into pixel positions
+            float x1 = left + b.day * dayWidth + 2 * dp;
+            float x2 = x1 + dayWidth - 4 * dp;
+            float y1 = top + (b.startMinute - firstHour * 60) / 60f * hourHeight + dp;
+            float y2 = top + (b.endMinute - firstHour * 60) / 60f * hourHeight - dp;
 
-            for (TimeSlot t : section.getSlots()) {
-                if (t.getDay() >= dayCount) {
-                    continue;
-                }
-                // Convert day and time into pixel positions
-                float x1 = left + t.getDay() * dayWidth + 2 * dp;
-                float x2 = x1 + dayWidth - 4 * dp;
-                float y1 = top + (t.getStartMinute() - firstHour * 60) / 60f * hourHeight + 1 * dp;
-                float y2 = top + (t.getEndMinute() - firstHour * 60) / 60f * hourHeight - 1 * dp;
+            blockPaint.setColor(b.color);
+            rect.set(x1, y1, x2, y2);
+            canvas.drawRoundRect(rect, 6 * dp, 6 * dp, blockPaint);
 
-                rect.set(x1, y1, x2, y2);
-                canvas.drawRoundRect(rect, 6 * dp, 6 * dp, blockPaint);
-
-                // Text inside the block (clipped so it never spills outside)
-                canvas.save();
-                canvas.clipRect(rect);
-                float textX = x1 + 4 * dp;
-                float textY = y1 + lineHeight;
-                canvas.drawText(section.getCourseCode(), textX, textY, blockTextPaint);
-                canvas.drawText("Sec " + section.getName(), textX, textY + lineHeight, blockTextPaint);
-                canvas.drawText(UiUtils.formatClock(t.getStartMinute()), textX, textY + 2 * lineHeight, blockTextPaint);
-                canvas.restore();
-            }
+            // Text inside the block (clipped so it never spills outside)
+            canvas.save();
+            canvas.clipRect(rect);
+            float textX = x1 + 4 * dp;
+            float textY = y1 + lineHeight;
+            canvas.drawText(b.courseLine, textX, textY, blockTextPaint);
+            canvas.drawText(b.sectionLine, textX, textY + lineHeight, blockTextPaint);
+            canvas.drawText(b.timeLine, textX, textY + 2 * lineHeight, blockTextPaint);
+            canvas.restore();
         }
     }
 

@@ -16,12 +16,14 @@ import com.ahmad.smartschedulebuilder.data.AppData;
 import com.ahmad.smartschedulebuilder.logic.ClashExplainer;
 import com.ahmad.smartschedulebuilder.logic.ScheduleGenerator;
 import com.ahmad.smartschedulebuilder.logic.ScheduleRanker;
+import com.ahmad.smartschedulebuilder.model.Course;
 import com.ahmad.smartschedulebuilder.model.Section;
 import com.ahmad.smartschedulebuilder.model.TimeSlot;
 import com.ahmad.smartschedulebuilder.ui.UiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /** Page 3: filters and ranking, then Generate. */
 public class PrefsActivity extends AppCompatActivity {
@@ -45,10 +47,9 @@ public class PrefsActivity extends AppCompatActivity {
         inputMaxHours = findViewById(R.id.inputMaxHours);
         spinnerRank = findViewById(R.id.spinnerRank);
 
-        // Same order as RANK_FEWEST_GAPS, RANK_FEWEST_DAYS, RANK_LATEST_START
-        String[] rankOptions = {"Fewest gaps", "Fewest days on campus", "Latest start"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, rankOptions);
+        // Options come from res/values/strings.xml (same order as the RANK_ constants)
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this, R.array.rank_options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRank.setAdapter(adapter);
 
@@ -64,13 +65,17 @@ public class PrefsActivity extends AppCompatActivity {
     private void showPrefsOnScreen() {
         ScheduleRanker.Preferences prefs = AppData.prefs;
         btnEarliest.setText(prefs.earliestStart == 0
-                ? "Earliest class: any"
-                : "Earliest class: " + UiUtils.formatClock(prefs.earliestStart));
+                ? getString(R.string.pref_earliest_any)
+                : getString(R.string.pref_earliest_value, UiUtils.formatClock(prefs.earliestStart)));
         btnLatest.setText(prefs.latestEnd == 24 * 60
-                ? "Latest end: any"
-                : "Latest end: " + UiUtils.formatClock(prefs.latestEnd));
+                ? getString(R.string.pref_latest_any)
+                : getString(R.string.pref_latest_value, UiUtils.formatClock(prefs.latestEnd)));
         switchFreeDay.setChecked(prefs.wantFreeDay);
-        inputMaxHours.setText(prefs.maxHoursPerDay == 24 ? "" : String.valueOf(prefs.maxHoursPerDay));
+        if (prefs.maxHoursPerDay == 24) {
+            inputMaxHours.getText().clear();   // 24 = no limit, so leave the field empty
+        } else {
+            inputMaxHours.setText(String.format(Locale.US, "%d", prefs.maxHoursPerDay));
+        }
         spinnerRank.setSelection(prefs.rankBy);
     }
 
@@ -94,23 +99,23 @@ public class PrefsActivity extends AppCompatActivity {
         AppData.prefs.maxHoursPerDay = 24;
         AppData.prefs.rankBy = ScheduleRanker.RANK_FEWEST_GAPS;
         showPrefsOnScreen();
-        UiUtils.toast(this, "Preferences reset");
+        UiUtils.toast(this, getString(R.string.msg_prefs_reset));
     }
 
     /** Copies the values on screen into AppData.prefs. Returns false if something is invalid. */
     private boolean readPrefsFromScreen() {
         ScheduleRanker.Preferences prefs = AppData.prefs;
         if (prefs.latestEnd <= prefs.earliestStart) {
-            UiUtils.toast(this, "Latest end must be after earliest class");
+            UiUtils.toast(this, getString(R.string.msg_latest_after_earliest));
             return false;
         }
         String hoursText = inputMaxHours.getText().toString().trim();
         if (hoursText.isEmpty()) {
             prefs.maxHoursPerDay = 24;
         } else {
-            int hours = Integer.parseInt(hoursText);
+            int hours = Integer.parseInt(hoursText);   // safe: the field allows 2 digits only
             if (hours < 1 || hours > 24) {
-                UiUtils.toast(this, "Max hours must be between 1 and 24");
+                UiUtils.toast(this, getString(R.string.msg_max_hours_range));
                 return false;
             }
             prefs.maxHoursPerDay = hours;
@@ -128,11 +133,21 @@ public class PrefsActivity extends AppCompatActivity {
         List<List<Section>> all = ScheduleGenerator.generate(AppData.courses);
         AppData.lastTotalFound = all.size();
         // If nothing fits, find out why
-        AppData.clashReasons = all.isEmpty()
-                ? ClashExplainer.explain(AppData.courses)
-                : new ArrayList<>();
+        AppData.clashReasons = all.isEmpty() ? explainClashes() : new ArrayList<>();
         AppData.results = ScheduleRanker.filterAndSort(all, AppData.prefs);
 
         startActivity(new Intent(this, SchedulesActivity.class));
+    }
+
+    /** Turns the clashing course pairs into messages in the phone's language. */
+    private List<String> explainClashes() {
+        List<String> reasons = new ArrayList<>();
+        for (Course[] pair : ClashExplainer.alwaysClashingPairs(AppData.courses)) {
+            reasons.add(getString(R.string.msg_always_clash, pair[0].getCode(), pair[1].getCode()));
+        }
+        if (reasons.isEmpty()) {
+            reasons.add(getString(R.string.msg_no_single_pair));
+        }
+        return reasons;
     }
 }

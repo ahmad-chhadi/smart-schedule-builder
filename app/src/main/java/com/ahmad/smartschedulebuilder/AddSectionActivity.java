@@ -56,7 +56,7 @@ public class AddSectionActivity extends AppCompatActivity {
         }
 
         TextView textCourseTitle = findViewById(R.id.textCourseTitle);
-        textCourseTitle.setText(course.getCode() + " - " + course.getTitle());
+        textCourseTitle.setText(getString(R.string.course_row_title, course.getCode(), course.getTitle()));
 
         inputSectionName = findViewById(R.id.inputSectionName);
         btnStartTime = findViewById(R.id.btnStartTime);
@@ -90,10 +90,10 @@ public class AddSectionActivity extends AppCompatActivity {
         new TimePickerDialog(this, (view, h, m) -> {
             if (isStart) {
                 startMinute = TimeSlot.toMinutes(h, m);
-                btnStartTime.setText("Start " + UiUtils.formatClock(startMinute));
+                btnStartTime.setText(getString(R.string.btn_start_time_value, UiUtils.formatClock(startMinute)));
             } else {
                 endMinute = TimeSlot.toMinutes(h, m);
-                btnEndTime.setText("End " + UiUtils.formatClock(endMinute));
+                btnEndTime.setText(getString(R.string.btn_end_time_value, UiUtils.formatClock(endMinute)));
             }
         }, hour, minute, true).show();
     }
@@ -102,7 +102,7 @@ public class AddSectionActivity extends AppCompatActivity {
         // 1) Validate the input
         String name = inputSectionName.getText().toString().trim().toUpperCase(Locale.US);
         if (name.isEmpty()) {
-            UiUtils.toast(this, "Please enter a section name");
+            UiUtils.toast(this, getString(R.string.msg_enter_section_name));
             return;
         }
         List<Integer> days = new ArrayList<>();
@@ -112,15 +112,15 @@ public class AddSectionActivity extends AppCompatActivity {
             }
         }
         if (days.isEmpty()) {
-            UiUtils.toast(this, "Choose at least one day");
+            UiUtils.toast(this, getString(R.string.msg_choose_day));
             return;
         }
         if (startMinute < 0 || endMinute < 0) {
-            UiUtils.toast(this, "Choose the start and end time");
+            UiUtils.toast(this, getString(R.string.msg_choose_times));
             return;
         }
         if (endMinute <= startMinute) {
-            UiUtils.toast(this, "End time must be after start time");
+            UiUtils.toast(this, getString(R.string.msg_end_after_start));
             return;
         }
 
@@ -139,7 +139,8 @@ public class AddSectionActivity extends AppCompatActivity {
             if (section != null) {
                 for (TimeSlot existing : section.getSlots()) {
                     if (existing.overlapsWith(slot)) {
-                        UiUtils.toast(this, "Section " + name + " already meets at " + existing);
+                        UiUtils.toast(this, getString(R.string.msg_section_overlaps, name,
+                                UiUtils.formatSlot(this, existing)));
                         return;
                     }
                 }
@@ -157,32 +158,34 @@ public class AddSectionActivity extends AppCompatActivity {
         AppData.clearResults();
 
         // 5) Reset the form and refresh the list
-        inputSectionName.setText("");
+        inputSectionName.getText().clear();
         for (CheckBox box : dayBoxes) {
             box.setChecked(false);
         }
         refreshSectionList();
-        UiUtils.toast(this, "Added section " + name);
+        UiUtils.toast(this, getString(R.string.msg_section_added, name));
     }
 
-    /** Rebuilds the list of sections of this course. */
+    /** Rebuilds the list of sections of this course: one card per section. */
     private void refreshSectionList() {
         sectionListContainer.removeAllViews();
         textEmptySections.setVisibility(course.getSections().isEmpty() ? View.VISIBLE : View.GONE);
 
         for (Section s : course.getSections()) {
-            TextView row = new TextView(this);
-            row.setText("Section " + s.getName() + ": " + s.getSlots());
-            row.setTextSize(16);
-            row.setPadding(0, 12, 0, 12);
-            row.setOnLongClickListener(v -> {
+            View card = getLayoutInflater().inflate(R.layout.item_card, sectionListContainer, false);
+            TextView title = card.findViewById(R.id.textCardTitle);
+            TextView details = card.findViewById(R.id.textCardDetails);
+            title.setText(getString(R.string.section_title, s.getName()));
+            details.setText(UiUtils.formatSlots(this, s.getSlots()));
+
+            card.setOnLongClickListener(v -> {
                 course.removeSection(s);
                 AppData.clearResults();
                 refreshSectionList();
-                UiUtils.toast(this, "Removed section " + s.getName());
+                UiUtils.toast(this, getString(R.string.msg_section_removed, s.getName()));
                 return true;
             });
-            sectionListContainer.addView(row);
+            sectionListContainer.addView(card);
         }
     }
 }
