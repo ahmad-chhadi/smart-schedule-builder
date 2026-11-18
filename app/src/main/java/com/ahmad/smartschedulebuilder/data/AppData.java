@@ -21,6 +21,9 @@ public final class AppData {
     public static List<List<Section>> results = new ArrayList<>();
     public static int lastTotalFound = -1;   // -1 = Generate not pressed yet
 
+    // Why nothing fits (filled only when no clash-free schedule exists)
+    public static List<String> clashReasons = new ArrayList<>();
+
     private AppData() { }   // no objects of this class
 
     /** Returns the course with this code, or null if it does not exist. */
@@ -37,5 +40,6 @@ public final class AppData {
     public static void clearResults() {
         results = new ArrayList<>();
         lastTotalFound = -1;
+        clashReasons = new ArrayList<>();
     }
 }

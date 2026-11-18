@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Temporary images in the app's cache folder, used only for sharing -->
+    <cache-path
+        name="images"
+        path="images/" />
+</paths>

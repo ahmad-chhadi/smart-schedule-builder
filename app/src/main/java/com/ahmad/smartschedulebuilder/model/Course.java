@@ -23,6 +23,11 @@ public class Course {
         return section;
     }
 
+    /** Removes one section from this course. */
+    public void removeSection(Section section) {
+        sections.remove(section);
+    }
+
     public String getCode() {
         return code;
     }

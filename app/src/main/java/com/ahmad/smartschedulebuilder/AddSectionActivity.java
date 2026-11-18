@@ -124,24 +124,39 @@ public class AddSectionActivity extends AppCompatActivity {
             return;
         }
 
-        // 2) Find the section, or create it if it is new
+        // 2) Find the section if it already exists
         Section section = null;
         for (Section s : course.getSections()) {
             if (s.getName().equals(name)) {
                 section = s;
             }
         }
+
+        // 3) Build the new time slots and make sure they do not overlap the section's own times
+        List<TimeSlot> newSlots = new ArrayList<>();
+        for (int day : days) {
+            TimeSlot slot = new TimeSlot(day, startMinute, endMinute);
+            if (section != null) {
+                for (TimeSlot existing : section.getSlots()) {
+                    if (existing.overlapsWith(slot)) {
+                        UiUtils.toast(this, "Section " + name + " already meets at " + existing);
+                        return;
+                    }
+                }
+            }
+            newSlots.add(slot);
+        }
+
+        // 4) Create the section if it is new, then add the slots
         if (section == null) {
             section = course.addSection(name);
         }
-
-        // 3) Add one time slot for each selected day
-        for (int day : days) {
-            section.addSlot(new TimeSlot(day, startMinute, endMinute));
+        for (TimeSlot slot : newSlots) {
+            section.addSlot(slot);
         }
         AppData.clearResults();
 
-        // 4) Reset the form and refresh the list
+        // 5) Reset the form and refresh the list
         inputSectionName.setText("");
         for (CheckBox box : dayBoxes) {
             box.setChecked(false);
@@ -160,6 +175,13 @@ public class AddSectionActivity extends AppCompatActivity {
             row.setText("Section " + s.getName() + ": " + s.getSlots());
             row.setTextSize(16);
             row.setPadding(0, 12, 0, 12);
+            row.setOnLongClickListener(v -> {
+                course.removeSection(s);
+                AppData.clearResults();
+                refreshSectionList();
+                UiUtils.toast(this, "Removed section " + s.getName());
+                return true;
+            });
             sectionListContainer.addView(row);
         }
     }

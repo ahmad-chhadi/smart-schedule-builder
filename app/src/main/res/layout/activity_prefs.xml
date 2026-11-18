@@ -58,7 +58,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:hint="Max class hours per day (optional)"
-                android:inputType="number" />
+                android:inputType="number"
+                android:maxLength="2" />
 
             <TextView
                 android:layout_width="wrap_content"

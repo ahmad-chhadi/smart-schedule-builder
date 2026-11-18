@@ -67,7 +67,13 @@
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
-
+    <Button
+        android:id="@+id/btnShare"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:text="Share as image" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

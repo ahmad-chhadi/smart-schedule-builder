@@ -13,12 +13,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.ahmad.smartschedulebuilder.data.AppData;
+import com.ahmad.smartschedulebuilder.logic.ClashExplainer;
 import com.ahmad.smartschedulebuilder.logic.ScheduleGenerator;
 import com.ahmad.smartschedulebuilder.logic.ScheduleRanker;
 import com.ahmad.smartschedulebuilder.model.Section;
 import com.ahmad.smartschedulebuilder.model.TimeSlot;
 import com.ahmad.smartschedulebuilder.ui.UiUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Page 3: filters and ranking, then Generate. */
@@ -125,6 +127,10 @@ public class PrefsActivity extends AppCompatActivity {
 
         List<List<Section>> all = ScheduleGenerator.generate(AppData.courses);
         AppData.lastTotalFound = all.size();
+        // If nothing fits, find out why
+        AppData.clashReasons = all.isEmpty()
+                ? ClashExplainer.explain(AppData.courses)
+                : new ArrayList<>();
         AppData.results = ScheduleRanker.filterAndSort(all, AppData.prefs);
 
         startActivity(new Intent(this, SchedulesActivity.class));
