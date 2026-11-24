@@ -86,6 +86,7 @@ class TimetableView extends StatelessWidget {
           lastHour: lastHour,
           dayCount: hasSaturday ? 6 : 5,
           dayNames: s.dayNames,
+          rightToLeft: Directionality.of(context) == TextDirection.rtl,
           gridColor: scheme.outline.withValues(alpha: 0.3),
           labelColor: scheme.onSurfaceVariant,
         ),
@@ -101,6 +102,7 @@ class _TimetablePainter extends CustomPainter {
     required this.lastHour,
     required this.dayCount,
     required this.dayNames,
+    required this.rightToLeft,
     required this.gridColor,
     required this.labelColor,
   });
@@ -110,16 +112,26 @@ class _TimetablePainter extends CustomPainter {
   final int lastHour;
   final int dayCount;
   final List<String> dayNames;
+  final bool rightToLeft; // Arabic: Monday on the right, hours on the right
   final Color gridColor;
   final Color labelColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const left = TimetableView.labelWidth;
+    const labelWidth = TimetableView.labelWidth;
     const top = TimetableView.headerHeight;
     const hourHeight = TimetableView.hourHeight;
-    final dayWidth = (size.width - left) / dayCount;
+    final dayWidth = (size.width - labelWidth) / dayCount;
     final gridBottom = top + (lastHour - firstHour) * hourHeight;
+
+    // The hour labels sit on the left in English and on the right in Arabic
+    final gridLeft = rightToLeft ? 0.0 : labelWidth;
+    final gridRight = gridLeft + dayCount * dayWidth;
+    final labelX = rightToLeft ? gridRight + 2 : 2.0;
+
+    // Left edge of a day column (in Arabic Monday is the right-most column)
+    double columnX(int day) =>
+        gridLeft + (rightToLeft ? dayCount - 1 - day : day) * dayWidth;
 
     final gridPaint = Paint()
       ..color = gridColor
@@ -134,27 +146,27 @@ class _TimetablePainter extends CustomPainter {
 
     // 1) Day names across the top
     for (var d = 0; d < dayCount; d++) {
-      final centerX = left + d * dayWidth + dayWidth / 2;
+      final centerX = columnX(d) + dayWidth / 2;
       _drawText(canvas, dayNames[d], labelStyle, Offset(centerX, top - 22), center: true);
     }
 
     // 2) Hour lines and hour labels down the side
     for (var h = firstHour; h <= lastHour; h++) {
       final y = top + (h - firstHour) * hourHeight;
-      canvas.drawLine(Offset(left, y), Offset(size.width, y), gridPaint);
-      _drawText(canvas, formatClock(h * 60), labelStyle, Offset(2, y - 8));
+      canvas.drawLine(Offset(gridLeft, y), Offset(gridRight, y), gridPaint);
+      _drawText(canvas, formatClock(h * 60), labelStyle, Offset(labelX, y - 8));
     }
 
     // 3) Vertical lines between days
     for (var d = 0; d <= dayCount; d++) {
-      final x = left + d * dayWidth;
+      final x = gridLeft + d * dayWidth;
       canvas.drawLine(Offset(x, top), Offset(x, gridBottom), gridPaint);
     }
 
     // 4) One colored block for every class
     for (final b in blocks) {
       // Convert day and time into pixel positions
-      final x1 = left + b.day * dayWidth + 2;
+      final x1 = columnX(b.day) + 2;
       final y1 = top + (b.startMinute - firstHour * 60) / 60 * hourHeight + 1;
       final y2 = top + (b.endMinute - firstHour * 60) / 60 * hourHeight - 1;
       final rect = RRect.fromLTRBR(x1, y1, x1 + dayWidth - 4, y2, const Radius.circular(6));

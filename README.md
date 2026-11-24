@@ -8,6 +8,18 @@ their sections, days and times. The app builds **every clash-free weekly schedul
 filters them by your preferences, ranks them best-first and draws each one as a
 colored weekly timetable that you can share as an image.
 
+## Screenshots
+
+| Courses | Sections | Preferences | Schedule | Arabic |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="screenshots/1_courses.png" width="170"> | <img src="screenshots/2_sections.png" width="170"> | <img src="screenshots/3_preferences.png" width="170"> | <img src="screenshots/4_schedule.png" width="170"> | <img src="screenshots/5_arabic.png" width="170"> |
+
+## Download
+
+Install the app on any Android phone from the
+[latest release](https://github.com/ahmad-chhadi/smart-schedule-builder/releases/latest)
+(`SmartScheduleBuilder-v2.0.apk`).
+
 ## Features
 
 - Add courses and sections (one section can meet on several days).
@@ -49,4 +61,4 @@ flutter run
 flutter test
 ```
 
-Built with Flutter 3.50 / Dart 3.14.
+Built with Flutter 3.50 / Dart 3.14. The same code can also be built for iOS (this needs a Mac with Xcode).
